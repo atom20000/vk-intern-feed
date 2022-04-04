@@ -1,7 +1,5 @@
 <?php
 
-//require_once PROJECT_ROOT . "/model/Database.php";
-
 /**
  * Implementations for everything which can be done with phone numbers.
  */
@@ -24,7 +22,7 @@ class NumberModel extends Database
     public function getCountryCode(string $phoneNumber)
     {
         // remove unnecessary characters
-        str_replace(['(', ')', '-', ' '], '', $phoneNumber);
+        $phoneNumber = str_replace(['(', ')', '-', ' '], '', $phoneNumber);
 
         // phone number must contain digits and `+` only
         if (!preg_match('/\+?[0-9]+/', $phoneNumber))
