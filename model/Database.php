@@ -23,42 +23,33 @@ class Database
     }
 
     /**
-     * Select rows from a database.
-     *
-     * @param string $query
-     * @param array $params
-     * @return array|false
-     */
-    public function select(string $query = "", array $params = [])
-    {
-        $stmt = $this->executeStatement($query, $params);
-
-        // maybe it should return just $stmt
-        return $stmt->fetchAll();
-    }
-
-    /**
      * Prepare and execute generic statement.
      *
      * @param string $query
      * @param array $params
      * @return PDOStatement
      */
-    private function executeStatement(string $query, array $params = []): PDOStatement
+    protected function executeStatement(string $query, array $params = []): PDOStatement
     {
         $stmt = $this->conn->prepare($query);
 
         if (!$stmt)
         {
-            throw new UnexpectedValueException("Unable to do prepared statement: " . $query);
+            throw new UnexpectedValueException("Failed to prepare query");
         }
 
         if ($params)
         {
-            $stmt->bindParam($params[0], $params[1]);
+            foreach ($params as $name => $value)
+            {
+                $stmt->bindValue($name, $value);
+            }
         }
 
-        $stmt->execute();
+        if (!$stmt->execute())
+        {
+            throw new UnexpectedValueException("Statement execution failed");
+        }
 
         return $stmt;
     }
