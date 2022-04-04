@@ -12,6 +12,9 @@ class Database
                 DB_USERNAME,
                 DB_PASSWORD
              );
+
+             // sqlite 'forgets' to use foreign keys for backwards compatability
+             $this->conn->exec("PRAGMA foreign_keys = ON");
         }
         catch (PDOException $e)
         {
