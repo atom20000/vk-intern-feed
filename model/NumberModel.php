@@ -73,6 +73,46 @@ class NumberModel extends Database
     }
 
     /**
+     * Search for a phone number beginning with a pattern.
+     *
+     * @param string $phonePattern
+     * Beginning of a phone number.
+     * @return array|false
+     * Array of phone numbers (['id'] and ['number']) on successful search,
+     * or false if the number is invalid.
+     */
+    public function matchPhone(string $phonePattern)
+    {
+        // remove unnecessary characters
+        $phonePattern = str_replace(['(', ')', '-', ' '], '', $phonePattern);
+
+        // phone number must contain digits and `+` only
+        if (!preg_match('/\+?[0-9]+/', $phonePattern))
+        {
+            return false;
+        }
+
+        $foundPhones = $this->executeStatement(
+            <<<SQL
+                SELECT id, number
+                FROM phones
+                WHERE number LIKE :pattern
+                SQL,
+            [
+                ':pattern' => $phonePattern . '%'
+            ]
+        )->fetchAll();
+
+        // empty array returned
+        if (!$foundPhones)
+        {
+            return false;
+        }
+
+        return $foundPhones;
+    }
+
+    /**
      * Check if string starts with a specific pattern.
      *
      * @param string $subject
