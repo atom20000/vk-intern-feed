@@ -79,4 +79,24 @@ class ReviewModel extends Database
         // insert successful - return inserted id
         return $countResult['id'];
     }
+
+    /**
+     * Get reviews for a given number ID.
+     *
+     * @param string $phoneId
+     * @return array|false
+     */
+    public function getReviews(string $phoneId)
+    {
+        return $this->executeStatement(
+            <<<SQL
+                SELECT id, body, author, rating
+                FROM reviews
+                WHERE num_id = :phoneId
+                SQL,
+            [
+                ':phoneId' => $phoneId
+            ]
+        )->fetchAll();
+    }
 }
