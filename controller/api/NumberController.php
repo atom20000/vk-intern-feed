@@ -1,47 +1,64 @@
 <?php
 
-//require_once "BaseController.php";
-//require_once PROJECT_ROOT . "/model/NumberModel.php";
-
 class NumberController extends BaseController
 {
     /**
-     * Endpoint `/phone/countryCode` - get country code for a given number
+     * Endpoint `/phone/country_code` - get country code for a given number
      */
-    public function countryCodeAction()
+    public function country_codeAction()
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $params = $this->getQueryStringParams();
+        $response = [
+            'error' => true
+        ];
+        $headers = [];
 
-        if ($method === 'GET')
+        if (strtoupper($method) === 'GET')
         {
             $numberModel = new NumberModel();
 
-            // if (isset($params['phone_number']) && $params['phone_number'])
+            if (isset($params['phone_number']) && $params['phone_number'])
+            {
+                $countryCode = null;
 
-            $countryCode = $numberModel->getCountryCode("+7123");
+                try
+                {
+                    $countryCode = $numberModel->getCountryCode($params['phone_number']);
+                }
+                catch (UnexpectedValueException $ex)
+                {
+                    $response['description'] = 'Internal Server Error';
+                    $headers[] = 'HTTP/1.1 500 Internal Server Error';
+                    $headers[] = 'Content-Type: application/json';
 
-            $this->sendOutput(
-                json_encode([
-                    "result" => $countryCode
-                ]),
-                array(
-                    'Content-Type: application/json; charset=utf-8',
-                    'HTTP/1.1 200 OK'
-                )
-            );
+                    $this->sendOutput($response, $headers);
+                }
+
+                // if result has been received, cancel error message
+                if ($countryCode)
+                {
+                    $response['error'] = false;
+                    $response['result'] = [
+                        'phone_number' => $params['phone_number'],
+                        'country_code' => $countryCode
+                    ];
+                    $headers[] = 'HTTP/1.1 200 OK';
+                }
+                else
+                {
+                    $response['description'] = 'Incorrect phone format or unavailable country';
+                    $headers[] = 'HTTP/1.1 400 Bad Request';
+                }
+            }
         }
         else
         {
-            $errorDesc = 'Method not allowed';
-            $errorHeader = 'HTTP/1.1 400 Bad Request';
-
-            $this->sendOutput(
-                json_encode([
-                    'error' => $errorDesc
-                ]),
-                ['Content-Type: application/json; charset=utf-8', $errorHeader]
-            );
+            $response['description'] = 'HTTP method is not supported';
+            $headers[] = 'HTTP/1.1 400 Bad Request';
         }
+
+        $headers[] = 'Content-Type: application/json';
+        $this->sendOutput(json_encode($response), $headers);
     }
 }
