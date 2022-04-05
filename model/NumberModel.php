@@ -113,6 +113,40 @@ class NumberModel extends Database
     }
 
     /**
+     * Get ID for a given phone number.
+     *
+     * @param string $phoneNumber
+     * @return string|false
+     * Given phone ID if exists,
+     * or false if phone not found.
+     */
+    public function getPhoneId(string $phoneNumber)
+    {
+        // remove unnecessary characters
+        $phoneNumber = str_replace(['(', ')', '-', ' '], '', $phoneNumber);
+
+        // phone number must contain digits and `+` only
+        if (!preg_match('/\+?[0-9]+/', $phoneNumber))
+        {
+            return false;
+        }
+
+        // check if number exists
+        $countResult = $this->executeStatement(
+            <<<SQL
+                SELECT id, COUNT(*) AS count
+                FROM phones
+                WHERE number = :phone
+                SQL,
+            [
+                ':phone' => $phoneNumber
+            ]
+        )->fetch();
+
+        return $countResult['id'] === null ? false : $countResult['id'];
+    }
+
+    /**
      * Check if string starts with a specific pattern.
      *
      * @param string $subject
