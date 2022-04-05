@@ -88,15 +88,17 @@ class ReviewModel extends Database
      */
     public function getReviews(string $phoneId)
     {
-        return $this->executeStatement(
-            <<<SQL
-                SELECT id, body, author, rating
-                FROM reviews
-                WHERE num_id = :phoneId
-                SQL,
-            [
-                ':phoneId' => $phoneId
-            ]
-        )->fetchAll();
+        return !is_numeric($phoneId)
+            ? false
+            : $this->executeStatement(
+                <<<SQL
+                    SELECT id, body, author, rating
+                    FROM reviews
+                    WHERE num_id = :phoneId
+                    SQL,
+                [
+                    ':phoneId' => $phoneId
+                ]
+            )->fetchAll();
     }
 }
