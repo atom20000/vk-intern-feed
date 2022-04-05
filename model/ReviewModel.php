@@ -101,4 +101,59 @@ class ReviewModel extends Database
                 ]
             )->fetchAll();
     }
+
+    /**
+     * Update review rating.
+     *
+     * @param string $reviewId
+     * @param int $delta
+     * Value to adjust rating score:
+     * increment (upvote) or decrement (downvote).
+     * @return array|false
+     * Updated review entry or false if review was not found.
+     */
+    public function adjustReviewRating(string $reviewId, int $delta)
+    {
+        if (!is_numeric($reviewId))
+        {
+            return false;
+        }
+
+        $querySelectReviews = <<<SQL
+            SELECT *, COUNT(*) AS count
+            FROM reviews
+            WHERE id = :reviewId
+        SQL;
+
+        $reviewEntry = $this->executeStatement(
+            $querySelectReviews,
+            [
+                ':reviewId' => $reviewId
+            ]
+        )->fetch();
+
+        if ($reviewEntry['id'] === null)
+        {
+            return false;
+        }
+
+        $this->executeStatement(
+            <<<SQL
+                UPDATE reviews
+                SET rating = rating + (:delta)
+                WHERE id = :reviewId
+                SQL,
+            [
+                ':reviewId' => $reviewId,
+                ':delta' => $delta
+            ]
+        );
+
+        return $this->executeStatement(
+            $querySelectReviews,
+            [
+                ':reviewId' => $reviewId
+            ]
+        )->fetch(PDO::FETCH_ASSOC);
+    }
 }
