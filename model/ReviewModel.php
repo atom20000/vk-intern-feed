@@ -93,7 +93,7 @@ class ReviewModel extends Database
                 [
                     ':phoneId' => $phoneId
                 ]
-            )->fetchAll();
+            )->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
