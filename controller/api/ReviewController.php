@@ -39,8 +39,8 @@ class ReviewController extends BaseController
                     if ($reviewModel->submitReview(
                         $params['phone_number'],
                         $json['review_text'],
-                        (isset($json['author']) && $json['author'])
-                            ? $json['author']
+                        (isset($json['username']) && $json['username'])
+                            ? $json['username']
                             : 'anonymous'
                     ))
                     {
@@ -68,10 +68,7 @@ class ReviewController extends BaseController
             }
             else
             {
-                $response['description'] = <<<TXT
-                    The phone_number parameter
-                    and non-empty review_text in JSON body must be provided
-                    TXT;
+                $response['description'] = 'The phone_number parameter and non-empty review_text in JSON body must be provided';
                 $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
             }
         }
