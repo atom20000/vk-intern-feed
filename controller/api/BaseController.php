@@ -27,7 +27,7 @@ class BaseController
      *
      * @return array
      */
-    protected function getUriSegments(): array
+    protected function getUriSegments()
     {
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -40,7 +40,7 @@ class BaseController
      *
      * @return array
      */
-    protected function getQueryStringParams(): array
+    protected function getQueryStringParams()
     {
         if (isset($_SERVER['QUERY_STRING']))
         {

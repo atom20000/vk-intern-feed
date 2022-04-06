@@ -17,7 +17,7 @@ class NumberModel extends Database
      * Otherwise, the number is considered russian.
      *
      * @param string $phoneNumber
-     * @return string|false
+     * @return false|string
      */
     public function getCountryCode(string $phoneNumber)
     {
@@ -116,7 +116,7 @@ class NumberModel extends Database
      * Get ID for a given phone number.
      *
      * @param string $phoneNumber
-     * @return string|false
+     * @return false|string
      * Given phone ID if exists,
      * or false if phone not found.
      */

@@ -29,7 +29,7 @@ class Database
      * @param array $params
      * @return PDOStatement
      */
-    protected function executeStatement(string $query, array $params = []): PDOStatement
+    protected function executeStatement(string $query, array $params = [])
     {
         $stmt = $this->conn->prepare($query);
 
