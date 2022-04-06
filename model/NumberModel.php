@@ -87,7 +87,7 @@ class NumberModel extends Database
         $phonePattern = str_replace(['(', ')', '-', ' '], '', $phonePattern);
 
         // phone number must contain digits and `+` only
-        if (!preg_match('/\+?[0-9]+/', $phonePattern))
+        if (!preg_match('/^\+?[0-9]+$/', $phonePattern))
         {
             return false;
         }
@@ -126,7 +126,7 @@ class NumberModel extends Database
         $phoneNumber = str_replace(['(', ')', '-', ' '], '', $phoneNumber);
 
         // phone number must contain digits and `+` only
-        if (!preg_match('/\+?[0-9]+/', $phoneNumber))
+        if (!preg_match('/^\+?[0-9]+$/', $phoneNumber))
         {
             return false;
         }
