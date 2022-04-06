@@ -3,13 +3,22 @@
 class BaseController
 {
     /**
-     * Magic method.
      * Called when you try to call method that does not exist.
-     * Use this to throw the Not Found error on unimplemented method call.
+     * Used to return error on unresolved endpoint call.
      */
     public function __call($name, $arguments)
     {
-        $this->sendOutput('', ['HTTP/1.1 404 Not Found']);
+        $this->sendOutput(
+            json_encode(
+                [
+                    'error' => true,
+                    'description' => 'Unable to resolve ' . $name
+                ]
+            ),
+            [
+                'HTTP/1.1 404 Not Found',
+                'Content-Type: application/json'
+            ]);
     }
 
     /**
@@ -33,9 +42,13 @@ class BaseController
      */
     protected function getQueryStringParams(): array
     {
-        parse_str($_SERVER['QUERY_STRING'], $query);
+        if (isset($_SERVER['QUERY_STRING']))
+        {
+            parse_str($_SERVER['QUERY_STRING'], $query);
 
-        return $query;
+            return $query;
+        }
+        return [];
     }
 
     /**
