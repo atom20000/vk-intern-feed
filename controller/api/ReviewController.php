@@ -204,10 +204,21 @@ class ReviewController extends BaseController
             'error' => true
         ];
         $responseHeaders = [];
+        $contentType = isset($_SERVER['CONTENT_TYPE'])
+            ? trim($_SERVER['CONTENT_TYPE'])
+            : '';
 
-        if (strtoupper($method) === 'POST')
+        if ((strtoupper($method) === 'POST')
+            && (strcasecmp($contentType, 'application/json') >= 0))
         {
-            if (isset($params['review_id']) && $params['review_id'])
+            $requestContent = file_get_contents('php://input');
+            $json = json_decode($requestContent, true);
+
+            if (is_array($json)
+                && isset($params['review_id'])
+                && $params['review_id']
+                && isset($json['username'])
+                && $json['username'])
             {
                 $reviewModel = new ReviewModel();
                 $updatedReview = null;
@@ -241,13 +252,13 @@ class ReviewController extends BaseController
             }
             else
             {
-                $response['description'] = 'The review_id parameter must be provided';
+                $response['description'] = 'The review_id parameter and non-empty username in JSON body must be provided';
                 $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
             }
         }
         else
         {
-            $response['description'] = 'HTTP method is not supported';
+            $response['description'] = 'HTTP method or Content-Type is not supported';
             $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
         }
 
