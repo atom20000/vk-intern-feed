@@ -8,3 +8,4 @@ require_once PROJECT_ROOT . "/model/NumberModel.php";
 require_once PROJECT_ROOT . "/model/ReviewModel.php";
 require_once PROJECT_ROOT . "/controller/api/BaseController.php";
 require_once PROJECT_ROOT . "/controller/api/NumberController.php";
+require_once PROJECT_ROOT . "/controller/api/ReviewController.php";
