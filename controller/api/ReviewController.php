@@ -179,4 +179,80 @@ class ReviewController extends BaseController
 
         $this->sendOutput(json_encode($response), $responseHeaders);
     }
+
+    /**
+     * Endpoint `/review/upvote` - increment review rating.
+     */
+    public function upvoteAction()
+    {
+        $this->adjustRating(1);
+    }
+
+    /**
+     * Endpoint `/review/downvote` - decrement review rating.
+     */
+    public function downvoteAction()
+    {
+        $this->adjustRating(-1);
+    }
+
+    private function adjustRating(int $delta)
+    {
+        $method = $_SERVER['REQUEST_METHOD'];
+        $params = $this->getQueryStringParams();
+        $response = [
+            'error' => true
+        ];
+        $responseHeaders = [];
+
+        if (strtoupper($method) === 'POST')
+        {
+            if (isset($params['review_id']) && $params['review_id'])
+            {
+                $reviewModel = new ReviewModel();
+                $updatedReview = null;
+
+                try
+                {
+                    $updatedReview = $reviewModel->adjustReviewRating($params['review_id'], $delta);
+                }
+                catch (UnexpectedValueException $ex)
+                {
+                    $response['description'] = 'Internal Server Error';
+                    $responseHeaders[] = 'HTTP/1.1 500 Internal Server Error';
+                    $responseHeaders[] = 'Content-Type: application/json';
+
+                    $this->sendOutput($response, $responseHeaders);
+                }
+
+                if ($updatedReview)
+                {
+                    $response['error'] = false;
+                    $response['result'] = [
+                        'updated_review' => $updatedReview
+                    ];
+                    $responseHeaders[] = 'HTTP/1.1 200 OK';
+                }
+                else
+                {
+                    $response['description'] = 'Incorrect review id, review not found';
+                    $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
+                }
+            }
+            else
+            {
+                $response['description'] = 'The review_id parameter must be provided';
+                $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
+            }
+        }
+        else
+        {
+            $response['description'] = 'HTTP method is not supported';
+            $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
+        }
+
+        $responseHeaders[] = 'Content-Type: application/json';
+
+        $this->sendOutput(json_encode($response), $responseHeaders);
+    }
 }
