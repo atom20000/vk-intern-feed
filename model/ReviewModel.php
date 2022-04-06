@@ -114,7 +114,7 @@ class ReviewModel extends Database
         }
 
         $querySelectReviews = <<<SQL
-            SELECT *, COUNT(*) AS count
+            SELECT *
             FROM reviews
             WHERE id = :reviewId
         SQL;
