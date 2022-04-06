@@ -14,7 +14,7 @@ class ReviewModel extends Database
      * @return bool
      * True if insert was successful or false if provided number is invalid.
      */
-    public function submitReview(string $phoneNumber, string $reviewText, string $author = 'anonymous')
+    public function submitReview(string $phoneNumber, string $reviewText, string $author)
     {
         // remove unnecessary characters
         $phoneNumber = str_replace(['(', ')', '-', ' '], '', $phoneNumber);

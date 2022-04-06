@@ -3,7 +3,7 @@
 class NumberController extends BaseController
 {
     /**
-     * Endpoint `/phone/country_code` - get country code for a given number
+     * Endpoint `/phone/country_code` - get country code for a given number.
      */
     public function country_codeAction()
     {
@@ -12,27 +12,26 @@ class NumberController extends BaseController
         $response = [
             'error' => true
         ];
-        $headers = [];
+        $responseHeaders = [];
 
         if (strtoupper($method) === 'GET')
         {
-            $numberModel = new NumberModel();
-
             if (isset($params['phone_number']) && $params['phone_number'])
             {
+                $numberModel = new NumberModel();
                 $countryCode = null;
 
                 try
                 {
                     $countryCode = $numberModel->getCountryCode($params['phone_number']);
                 }
-                catch (UnexpectedValueException $ex)
+                catch (UnexpectedValueException $ex) // thrown during SQL statement execution
                 {
                     $response['description'] = 'Internal Server Error';
-                    $headers[] = 'HTTP/1.1 500 Internal Server Error';
-                    $headers[] = 'Content-Type: application/json';
+                    $responseHeaders[] = 'HTTP/1.1 500 Internal Server Error';
+                    $responseHeaders[] = 'Content-Type: application/json';
 
-                    $this->sendOutput($response, $headers);
+                    $this->sendOutput($response, $responseHeaders);
                 }
 
                 // if result has been received, cancel error message
@@ -43,7 +42,7 @@ class NumberController extends BaseController
                         'phone_number' => $params['phone_number'],
                         'country_code' => $countryCode
                     ];
-                    $headers[] = 'HTTP/1.1 200 OK';
+                    $responseHeaders[] = 'HTTP/1.1 200 OK';
                 }
                 else
                 {
@@ -133,10 +132,11 @@ class NumberController extends BaseController
         else
         {
             $response['description'] = 'HTTP method is not supported';
-            $headers[] = 'HTTP/1.1 400 Bad Request';
+            $responseHeaders[] = 'HTTP/1.1 400 Bad Request';
         }
 
-        $headers[] = 'Content-Type: application/json';
-        $this->sendOutput(json_encode($response), $headers);
+        $responseHeaders[] = 'Content-Type: application/json';
+
+        $this->sendOutput(json_encode($response), $responseHeaders);
     }
 }

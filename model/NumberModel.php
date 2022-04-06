@@ -131,8 +131,7 @@ class NumberModel extends Database
             return false;
         }
 
-        // check if number exists
-        $countResult = $this->executeStatement(
+        $phoneEntry = $this->executeStatement(
             <<<SQL
                 SELECT id, COUNT(*) AS count
                 FROM phones
@@ -143,7 +142,7 @@ class NumberModel extends Database
             ]
         )->fetch();
 
-        return $countResult['id'] === null ? false : $countResult['id'];
+        return $phoneEntry['id'] === null ? false : $phoneEntry['id'];
     }
 
     /**
