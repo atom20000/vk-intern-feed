@@ -5,16 +5,14 @@
  */
 class ReviewModel extends Database
 {
-    // TODO: upvote and downvote review
-
     /**
      * Submit a review for a given phone number.
-     * NOTE: the number for a review must be present in the database.
      *
      * @param string $phoneNumber
      * @param string $reviewText
      * @param string $author
-     * @return string|false
+     * @return bool
+     * True if insert was successful or false if provided number is invalid.
      */
     public function submitReview(string $phoneNumber, string $reviewText, string $author = 'anonymous')
     {
@@ -27,42 +25,39 @@ class ReviewModel extends Database
             return false;
         }
 
-        // get id of provided number
-        $countResult = $this->executeStatement(
-            <<<SQL
-                SELECT id, COUNT(*) AS count
+        $querySelectPhone = <<<SQL
+                SELECT id
                 FROM phones
                 WHERE number = :phone
-                SQL,
+                SQL;
+
+        $phoneEntry = $this->executeStatement(
+            $querySelectPhone,
             [
                 ':phone' => $phoneNumber
             ]
         )->fetch();
 
-//        // number is not inserted - need to insert and get its id first
-//        if ($countResult['id'] === null)
-//        {
-//            $this->executeStatement(
-//                <<<SQL
-//                    INSERT INTO phones (number)
-//                    VALUES (:phone)
-//                    SQL,
-//                [
-//                    ':phone' => $phoneNumber
-//                ]
-//            );
-//
-//            $countResult['id'] = $this->executeStatement(
-//                <<<SQL
-//                    SELECT id
-//                    FROM phones
-//                    WHERE number = :phone
-//                    SQL,
-//                [
-//                    ':phone' => $phoneNumber
-//                ]
-//            )->fetch()['id'];
-//        }
+        // number is not inserted - need to insert and get its id first
+        if (!$phoneEntry)
+        {
+            $this->executeStatement(
+                <<<SQL
+                    INSERT INTO phones (number)
+                    VALUES (:phone)
+                    SQL,
+                [
+                    ':phone' => $phoneNumber
+                ]
+            );
+
+            $phoneEntry = $this->executeStatement(
+                $querySelectPhone,
+                [
+                    ':phone' => $phoneNumber
+                ]
+            )->fetch();
+        }
 
         $this->executeStatement(
             <<<SQL
@@ -70,14 +65,13 @@ class ReviewModel extends Database
                 VALUES (:numId, :body, :author)
                 SQL,
             [
-                ':numId' => $countResult['id'],
+                ':numId' => $phoneEntry['id'],
                 ':body' => $reviewText,
                 ':author' => $author
             ]
         );
 
-        // insert successful - return inserted id
-        return $countResult['id'];
+        return true;
     }
 
     /**
